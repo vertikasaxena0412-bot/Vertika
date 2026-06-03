@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertika Saxena — Tailscale BizOps</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c28;
+    --accent: #5b8af5; --accent2: #7c5bf5; --accent3: #3dd68c;
+    --text: #f0f0f5; --muted: #8888a8; --border: #2a2a3a;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; overflow-x: hidden; }
+
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(10,10,15,0.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border); padding: 16px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-logo { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    padding: 140px 48px 80px; max-width: 1100px; margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-block; background: rgba(91,138,245,0.12);
+    border: 1px solid rgba(91,138,245,0.3); color: var(--accent);
+    font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 20px;
+    letter-spacing: 0.5px; margin-bottom: 24px; text-transform: uppercase;
+  }
+  .hero h1 { font-size: clamp(40px, 5.5vw, 68px); font-weight: 800; letter-spacing: -2px; line-height: 1.05; margin-bottom: 24px; }
+  .hero h1 .highlight { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { font-size: 19px; color: var(--muted); max-width: 640px; margin-bottom: 40px; line-height: 1.75; }
+  .hero-meta { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 48px; }
+  .hero-meta-item { display: flex; align-items: center; gap: 8px; }
+  .hero-meta-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent3); box-shadow: 0 0 8px var(--accent3); }
+  .hero-meta-item span { font-size: 14px; color: var(--muted); }
+  .cta-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary { background: var(--accent); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; border: none; text-decoration: none; display: inline-block; transition: opacity 0.2s, transform 0.2s; }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text); padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; border: 1px solid var(--border); text-decoration: none; display: inline-block; transition: border-color 0.2s, transform 0.2s; }
+  .btn-ghost:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  /* CAREER ARC — THE KEY NEW SECTION */
+  .arc-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 80px 48px; }
+  .arc-inner { max-width: 1100px; margin: 0 auto; }
+  .arc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 48px; }
+  .arc-card {
+    background: var(--surface2); padding: 36px 32px; position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .arc-card:first-child { border-radius: 12px 0 0 12px; }
+  .arc-card:last-child { border-radius: 0 12px 12px 0; }
+  .arc-arrow {
+    position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
+    font-size: 28px; color: var(--accent); z-index: 2;
+  }
+  .arc-num { font-size: 48px; font-weight: 800; color: var(--border); margin-bottom: 12px; letter-spacing: -2px; }
+  .arc-company { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .arc-what { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  .arc-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .arc-badge { display: inline-block; margin-top: 16px; background: rgba(61,214,140,0.08); border: 1px solid rgba(61,214,140,0.25); color: var(--accent3); font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+
+  .stats-bar { padding: 56px 48px; }
+  .stats-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 44px; font-weight: 800; letter-spacing: -2px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+  section { padding: 100px 48px; max-width: 1100px; margin: 0 auto; }
+  .section-tag { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  h2.section-title { font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+  .section-sub { font-size: 17px; color: var(--muted); margin-bottom: 56px; max-width: 600px; }
+
+  .problem-box { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid #f5a623; border-radius: 12px; padding: 28px 32px; margin-bottom: 20px; }
+  .problem-box .label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #f5a623; margin-bottom: 12px; }
+  .problem-box p { font-size: 16px; line-height: 1.75; font-style: italic; color: var(--muted); }
+  .solution-box { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent3); border-radius: 12px; padding: 28px 32px; margin-bottom: 20px; }
+  .solution-box .label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent3); margin-bottom: 12px; }
+  .solution-box p { font-size: 15px; line-height: 1.8; color: var(--text); }
+  .solution-box ul { list-style: none; margin-top: 12px; }
+  .solution-box ul li { font-size: 15px; color: var(--muted); padding: 5px 0 5px 20px; position: relative; }
+  .solution-box ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent3); font-size: 12px; top: 7px; }
+  .tl-achievement { display: inline-block; margin-top: 12px; background: rgba(61,214,140,0.08); border: 1px solid rgba(61,214,140,0.25); border-radius: 8px; padding: 10px 16px; font-size: 14px; color: var(--accent3); font-weight: 600; }
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .skill-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; transition: border-color 0.2s, transform 0.2s; }
+  .skill-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .skill-icon { font-size: 24px; margin-bottom: 12px; }
+  .skill-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .skill-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  .tailscale-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 48px; margin-top: 32px; }
+  .ts-badge { background: rgba(91,138,245,0.1); border: 1px solid rgba(91,138,245,0.3); color: var(--accent); font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 20px; display: inline-block; margin: 0 8px 8px 0; }
+  .ts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px; }
+  .ts-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .ts-card-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .ts-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  footer { text-align: center; padding: 48px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.6s, transform 0.6s; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; } .nav-links { display: none; }
+    section { padding: 80px 24px; } .hero { padding: 120px 24px 80px; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .arc-grid { grid-template-columns: 1fr; } .arc-card { border-radius: 12px !important; margin-bottom: 4px; }
+    .arc-arrow { display: none; } .ts-grid { grid-template-columns: 1fr; }
+    .arc-section { padding: 60px 24px; } .stats-bar { padding: 48px 24px; }
+  }
+</style>
+
+<style>
+@page { size: A4; margin: 0.35in; }
+html, body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+body { background: #ffffff !important; color: #111 !important; }
+nav, .cta-row, footer, script { display: none !important; }
+section, .arc-section, .stats-bar, .tailscale-section { page-break-inside: avoid; break-inside: avoid; }
+.fade-up { opacity: 1 !important; transform: none !important; }
+.hero, .arc-section, .stats-bar, section, footer { padding-left: 0 !important; padding-right: 0 !important; max-width: none !important; }
+body * { box-shadow: none !important; text-shadow: none !important; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Vertika<span>.</span></div>
+  <ul class="nav-links">
+    <li><a href="#arc">Career Arc</a></li>
+    <li><a href="#case-study">Case Study</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#tailscale">Why Tailscale</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">✦ Applying · Business Operations & Strategy Manager</div>
+  <h1>I don't just use<br>operational systems.<br>I <span class="highlight">build them.</span></h1>
+  <p class="hero-sub">I built Avalara's global trade compliance SaaS — sold to Fortune 500 companies. Zonos hired me to build theirs from zero. Thomson Reuters brought me in to implement theirs at scale. That's the arc: build → scale → deploy.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><div class="dot"></div><span>Toronto, Canada · Remote-ready</span></div>
+    <div class="hero-meta-item"><div class="dot"></div><span>Avalara · Zonos · Thomson Reuters</span></div>
+    <div class="hero-meta-item"><div class="dot"></div><span>MBA · CCS Certified · 9+ years</span></div>
+  </div>
+  <div class="cta-row">
+    <a href="#tailscale" class="btn-primary">Why Tailscale →</a>
+    <a href="#arc" class="btn-ghost">See the Arc</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">SaaS systems built or scaled end-to-end</div></div>
+    <div class="stat"><div class="stat-num">40%</div><div class="stat-label">Risk reduction delivered at Avalara</div></div>
+    <div class="stat"><div class="stat-num">10M+</div><div class="stat-label">Monthly transactions on systems I built</div></div>
+    <div class="stat"><div class="stat-num">F500</div><div class="stat-label">Clients on the platform I built</div></div>
+  </div>
+</div>
+
+<!-- CAREER ARC -->
+<div class="arc-section" id="arc">
+  <div class="arc-inner">
+    <div class="fade-up">
+      <div class="section-tag">The Career Arc</div>
+      <h2 class="section-title" style="max-width:1100px">Build it. Prove it. Scale it.</h2>
+      <p style="font-size:17px; color:var(--muted); max-width:640px; margin-bottom:0; line-height:1.75;">Most people implement tools others built. I built the tool. Then I proved it works. Then I deployed it for the world's largest companies. That progression is why I'm ready to own BizOps at Tailscale.</p>
+    </div>
+    <div class="arc-grid fade-up">
+      <div class="arc-card">
+        <div class="arc-num">01</div>
+        <div class="arc-company">Avalara · 2016–2021</div>
+        <div class="arc-what">Built the product from the ground up</div>
+        <div class="arc-desc">Worked with architects, engineers, and SMEs to design and build Avalara's global trade compliance SaaS — the HTS classification engine, FTA logic, ECCN determination, duty drawback modules. This product was sold to Fortune 500 companies to manage their global trade operations. I wasn't a user. I was a builder.</div>
+        <div class="arc-badge">Product builder · Fortune 500 SaaS</div>
+        <div class="arc-arrow">→</div>
+      </div>
+      <div class="arc-card">
+        <div class="arc-num">02</div>
+        <div class="arc-company">Zonos · 2021–2022</div>
+        <div class="arc-what">Hired to build it again — from zero</div>
+        <div class="arc-desc">Zonos saw what I built at Avalara and hired me to replicate that operational infrastructure for their cross-border technology platform. No playbook, no prior framework. I designed their Global Trade Compliance function, QMS, KPI system, and operational protocols from scratch. By the time I left, the infrastructure was running without me.</div>
+        <div class="arc-badge">Zero → one · Durable handoff</div>
+        <div class="arc-arrow">→</div>
+      </div>
+      <div class="arc-card">
+        <div class="arc-num">03</div>
+        <div class="arc-company">Thomson Reuters · 2025–Now</div>
+        <div class="arc-what">Deploy robust systems at Fortune 500 scale</div>
+        <div class="arc-desc">Thomson Reuters already has ONESOURCE — one of the most robust GTM compliance platforms in the world. My job is to implement it for Fortune 500 clients: understand their operational reality, configure the system to fit, align global stakeholders, and hand off something that runs without constant intervention. This is deployment at the highest level.</div>
+        <div class="arc-badge">Enterprise deployment · AI-augmented</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CASE STUDY -->
+<section id="case-study">
+  <div class="fade-up">
+    <div class="section-tag">Real Work · How I Think</div>
+    <h2 class="section-title">Diagnose. Build. Hand off.<br>Don't solve it twice.</h2>
+    <p class="section-sub">This is how Tailscale's BizOps team describes their mandate. It's also how I've worked for 9 years.</p>
+
+    <div class="problem-box">
+      <div class="label">⚠ The Problem (Avalara)</div>
+      <p>"Fortune 500 companies need to manage HTS classification, FTA eligibility, duty drawback, and denied party screening across hundreds of markets — in real time, at millions of transactions per month. No existing tool handles all of it natively. Manual processes create risk and delay."</p>
+    </div>
+
+    <div class="solution-box">
+      <div class="label">🔍 My Diagnosis</div>
+      <p>The root issue was that global trade compliance was treated as a legal function, not an operational one. The logic existed in people's heads and in spreadsheets. To scale it, you had to systematize the logic — build rules engines that could make the same decisions a compliance expert would, consistently, at volume.</p>
+    </div>
+
+    <div class="solution-box">
+      <div class="label">⚡ What I Built (with engineers & architects)</div>
+      <ul>
+        <li>HS classification engine — automated tariff code determination across 180+ markets</li>
+        <li>FTA eligibility module — rules of origin logic for USMCA, CETA, CPTPP and more</li>
+        <li>ECCN/ABI determination — export control classification for dual-use goods</li>
+        <li>Duty drawback module — automated recovery of overpaid duties</li>
+        <li>Denied party screening — real-time sanctions and watchlist checks</li>
+      </ul>
+    </div>
+
+    <div class="solution-box">
+      <div class="label">📈 The Outcome</div>
+      <p>The platform processed 10M+ transactions per month for Fortune 500 clients. Audit exposure reduced by 40%. Zonos hired me to replicate the same infrastructure for their business. Thomson Reuters brought me in to deploy their equivalent system at global scale. The work compounded.</p>
+    </div>
+
+    <div class="tl-achievement">Build once. Sell to Fortune 500. Get hired to build it again. That's proof of concept.</div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills" style="background: var(--surface); max-width:100%; padding: 100px 0;">
+  <div style="max-width:1100px; margin:0 auto; padding: 0 48px;">
+    <div class="fade-up">
+      <div class="section-tag">How I Operate</div>
+      <h2 class="section-title">The full stack of a builder.</h2>
+      <p class="section-sub">I'm not a specialist. I'm an operator who can go deep on whatever the problem requires.</p>
+    </div>
+    <div class="skills-grid fade-up">
+      <div class="skill-card">
+        <div class="skill-icon">🏗️</div>
+        <div class="skill-name">Build From Zero</div>
+        <div class="skill-desc">Built Avalara's global trade SaaS. Built Zonos's compliance framework from scratch. I'm comfortable when there's no prior playbook — that's where I do my best work.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🔍</div>
+        <div class="skill-name">Problem Diagnosis</div>
+        <div class="skill-desc">I find the root cause before I build. At Avalara, the problem wasn't missing data — it was missing logic architecture. I diagnosed that and built toward the right solution.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📊</div>
+        <div class="skill-name">Data Analysis</div>
+        <div class="skill-desc">Power BI, Salesforce, SQL — I run my own analysis without waiting for a dedicated analyst. At Avalara I used Power BI for executive reporting on product performance.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🤖</div>
+        <div class="skill-name">AI-Assisted Workflows</div>
+        <div class="skill-desc">Claude for research synthesis and document drafting. Copilot across Microsoft 365 for meeting summaries and documentation. LLM-based querying for data pulls without raw SQL.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🌏</div>
+        <div class="skill-name">International Operations</div>
+        <div class="skill-desc">Built compliance logic for 180+ markets. Directed APAC, North American, and European operational strategy. Market entry isn't just legal — it's operational infrastructure.</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🤝</div>
+        <div class="skill-name">Cross-Functional Execution</div>
+        <div class="skill-desc">At Avalara I sat between engineers, architects, and SMEs to build product. At Thomson Reuters I align global executives, technical teams, and compliance officers simultaneously.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY TAILSCALE -->
+<section id="tailscale">
+  <div class="fade-up">
+    <div class="section-tag">Application · Tailscale</div>
+    <h2 class="section-title">Why Tailscale. Why now.<br>Why me.</h2>
+  </div>
+  <div class="tailscale-section fade-up">
+    <div style="margin-bottom:24px;">
+      <span class="ts-badge">Business Operations & Strategy Manager</span>
+      <span class="ts-badge">Remote · Canada</span>
+      <span class="ts-badge">Series C · ~290 employees</span>
+    </div>
+
+    <p style="font-size:18px; color:var(--text); line-height:1.8; margin-bottom:12px; font-weight:600;">
+      Tailscale's BizOps mandate is: diagnose, implement, hand off durable solutions so the company doesn't solve the same problem twice.
+    </p>
+    <p style="font-size:16px; color:var(--muted); line-height:1.8; margin-bottom:32px;">
+      I've been doing exactly that for 9 years. I built a compliance SaaS at Avalara that Fortune 500 companies still use. I was hired by Zonos to replicate it — from zero, no playbook — and handed it off so cleanly they didn't need me to maintain it. Now at Thomson Reuters I deploy the world's most robust GTM platform at enterprise scale. The throughline is always the same: build something durable, hand it off, move to the next problem.
+      <br><br>
+      I set up Tailscale recently. The product removed all the complexity I expected from network security — I was connected in minutes. That PLG motion — where the product sells itself through the experience — is exactly the kind of operational environment I want to build infrastructure around. Pricing architecture that matches developer adoption patterns. APAC expansion that doesn't create operational debt. GTM systems that scale with the product, not against it.
+    </p>
+
+    <div class="ts-grid">
+      <div class="ts-card">
+        <div class="ts-card-title">On Pricing Architecture</div>
+        <p>I built pricing logic into SaaS products at Avalara — where the wrong packaging created friction in the sales motion and the right one enabled enterprise land-and-expand. I understand how developer-led products price differently. I'm ready to own this end-to-end, from scoping through implementation.</p>
+      </div>
+      <div class="ts-card">
+        <div class="ts-card-title">On APAC Expansion (Singapore)</div>
+        <p>I've built operational compliance infrastructure for APAC markets from the ground up. Market entry isn't just entity setup — it's pricing localization, GTM motion adaptation, and operational frameworks that don't create rework for the next team. I've done this before.</p>
+      </div>
+      <div class="ts-card">
+        <div class="ts-card-title">On GTM Infrastructure & RevOps</div>
+        <p>At Avalara I partnered with RevOps equivalent teams to build scalable GTM systems. At Thomson Reuters I mature those systems for the world's largest companies. I know the difference between infrastructure that works at 1,000 customers and infrastructure that works at 100,000.</p>
+      </div>
+      <div class="ts-card">
+        <div class="ts-card-title">On Working at This Stage</div>
+        <p>290 people. Series C. The company is big enough to have real operational complexity but small enough that every project you own is visible. That's the environment where I've always done my best work. I'm not looking for a large team to disappear into — I'm looking for problems worth solving.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="font-size:22px; font-weight:800; margin-bottom:12px; letter-spacing:-0.5px;">Vertika Saxena</p>
+  <p style="margin-bottom:8px;">vertikasaxena0412@gmail.com &nbsp;·&nbsp; +1 437-986-6092 &nbsp;·&nbsp; Toronto, Ontario</p>
+  <p style="font-size:13px; color:var(--border);">Built for the Tailscale Business Operations & Strategy application · June 2026</p>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
